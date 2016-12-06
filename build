@@ -1,0 +1,3 @@
+avr-gcc -Os -DF_CPU=8000000 -mmcu=attiny85 transmitter-ctc-toggle.c
+avr-objcopy -O ihex a.out out.hex
+avrdude -c arduino -p attiny85 -P /dev/tty.usbmodem1411 -b 19200 -U flash:w:out.hex
