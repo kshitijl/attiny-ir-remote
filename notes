@@ -67,9 +67,19 @@ Crap! Looks like I should have ordered the low-power `ATTiny85V`
 variant. Assuming I get one of those, I see two modes, and boy are
 they different!
 
-CR1220 3V and 40mAh
+With a CR1220 coin battery running at 3V (measured 3.2V) and a
+capacity of 40mAh,
 => 40mAh/100mA = 0.4h
 = 1440s of continuous LED discharge (ignoring ATtiny)
+
+When I tried using the coin battery in real life, the range was worse
+than what I got using a 5v AC adapter. One obvious reason for this is
+that the LED is running with lower current -- the resistor in series
+is calibrated to deliver 100mA (less safety margin) at 5v.
+
+But another possible reason for bad range could be that the internal
+clock runs slightly off from the measured 8.02MHz at this different
+voltage. I will have to measure it and adjust.
 
 AAA battery 1.5V
 Typical capacity: 1000mAh
