@@ -84,3 +84,4 @@ voltage. I will have to measure it and adjust.
 AAA battery 1.5V
 Typical capacity: 1000mAh
 
+TSOP 1738 pin order: signal ground vcc from front (facing me)
