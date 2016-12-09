@@ -1,6 +1,8 @@
 #include <avr/io.h>
-#include <avr/interrupt.h>
 #include <util/delay.h>
+
+#include <avr/interrupt.h>
+#include <avr/sleep.h>
 
 #include <stdint.h>
 
@@ -28,15 +30,57 @@ void send_message(uint8_t message) {
 enum { MSG_VOLUME_UP = 25, MSG_VOLUME_DOWN = 98,
        MSG_TOGGLE_MUTE = 121 };
 
-void read_pins_queue_messages() {
+enum { BUTTON_WAS_PRESSED, BUTTON_WASNT_PRESSED };
+
+int read_pins_queue_messages() {
   uint8_t pins = PINB;
 
   if(pins & (1 << PB1)) {
     volume_up = 3;
+    return BUTTON_WAS_PRESSED;
   }
   else if(pins & (1 << PB2)) {
     volume_down = 3;
+    return BUTTON_WAS_PRESSED;
   }
+
+  return BUTTON_WASNT_PRESSED;
+}
+
+void go_to_sleep() {
+  // https://bigdanzblog.wordpress.com/2014/08/10/attiny85-wake-from-sleep-on-pin-state-change-code-example/
+
+  // Section 9.3.2. Turn on pin change interrupts
+  GIMSK = (1 << PCIE);
+
+  // Section 9.3.4. Turn on pin change interrupts on PB1/PCINT1/pin 6
+  // and PB2/PCINT2/pin 7.  
+  PCMSK = (1 << PCINT1) | (1 << PCINT2);
+
+  // Turn off ADC.
+  ADCSRA &= ~_BV(ADEN);
+
+  // We want super low power down mode.
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+
+  sleep_enable();
+  sei();
+  sleep_cpu();
+
+  // We get here once we wake from sleep.
+
+  // Entering critical section - disable interrupts.
+  cli();
+
+  // Turn off pin change interrupts.
+  PCMSK &= (~(1 << PCINT1)) & (~(1 << PCINT2));
+  sleep_disable();
+
+  // Turn on ADC.
+  ADCSRA |= _BV(ADEN);
+
+  // Enable interrupts.
+  sei();
 }
 
 void setup_38khz_carrier() {
@@ -63,22 +107,12 @@ void setup_38khz_carrier() {
   TCCR0B = (1 << CS00);
 }
 
-void setup_button_press_interrupts() {
-  // Section 9.3.2. Turn on pin change interrupts
-  GIMSK = (1 << PCIE);
-
-  // Section 9.3.4. Turn on pin change interrupts on PB1/PCINT1/pin 6
-  // and PB2/PCINT2/pin 7.
-  PCMSK = (1 << PCINT1) | (1 << PCINT2); 
-  sei();              // enable interrupts
-}
-
 void main() {
   setup_38khz_carrier();
-  setup_button_press_interrupts();
   
   for(;;) {
-    read_pins_queue_messages();
+    if(read_pins_queue_messages() == BUTTON_WASNT_PRESSED)
+      go_to_sleep();    
     
     if(volume_up > 0) {
       send_message(MSG_VOLUME_UP);
@@ -95,5 +129,5 @@ void main() {
 
 
 ISR(PCINT0_vect) {
-  read_pins_queue_messages();
+  // Called on pin-change, after waking from sleep.
 }

@@ -102,3 +102,11 @@ Out[4]: 107.92894736842105
 Chip was running at 8.2026Mhz, so 108-1 = 107 gave a perfect 38KHz
 modulated signal.
  */
+
+On power down mode at 5V, measured 0.5uA. That would be 80K hours
+assuming current consumption is the same at a lower voltage
+(unlikely). While a button is pressed, my multimeter reports 15mA.
+That the value is lower than 100mA makes sense: just like a 200mA
+current at a 50% duty cycle is reported as 100mA by this meter, the
+same peak current over the much smaller duty cycle in sending bits
+(and the timeouts between bytes) averages out to a lot less.
