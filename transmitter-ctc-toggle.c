@@ -28,7 +28,7 @@ void send_message(uint8_t message) {
 enum { MSG_VOLUME_UP = 25, MSG_VOLUME_DOWN = 98,
        MSG_TOGGLE_MUTE = 121 };
 
-void read_pins_increment_outbox() {
+void read_pins_queue_messages() {
   uint8_t pins = PINB;
 
   if(pins & (1 << PB1)) {
@@ -39,8 +39,7 @@ void read_pins_increment_outbox() {
   }
 }
 
-
-void main() {
+void setup_38khz_carrier() {
   DDRB = (1 << PB0); // set LED pin as an output pin
 
   // Table 11-2, row 2. Configure OC0A (pin 0) to be toggled on compare match.
@@ -61,8 +60,10 @@ void main() {
 
   // Table 11-6, row 2. Start timer with no prescaling. Set CS00 to 1 in
   // TCCR0B.
-  TCCR0B = (1 << CS00);  
+  TCCR0B = (1 << CS00);
+}
 
+void setup_button_press_interrupts() {
   // Section 9.3.2. Turn on pin change interrupts
   GIMSK = (1 << PCIE);
 
@@ -70,10 +71,14 @@ void main() {
   // and PB2/PCINT2/pin 7.
   PCMSK = (1 << PCINT1) | (1 << PCINT2); 
   sei();              // enable interrupts
+}
 
+void main() {
+  setup_38khz_carrier();
+  setup_button_press_interrupts();
   
   for(;;) {
-    read_pins_increment_outbox();
+    read_pins_queue_messages();
     
     if(volume_up > 0) {
       send_message(MSG_VOLUME_UP);
@@ -90,5 +95,5 @@ void main() {
 
 
 ISR(PCINT0_vect) {
-  read_pins_increment_outbox();
+  read_pins_queue_messages();
 }
