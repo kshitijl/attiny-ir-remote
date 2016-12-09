@@ -85,3 +85,20 @@ AAA battery 1.5V
 Typical capacity: 1000mAh
 
 TSOP 1738 pin order: signal ground vcc from front (facing me)
+
+
+/*
+In [1]: 8000000.0/(2*38000)
+Out[1]: 105.26315789473684
+
+In [2]: X = 2*39060 * 105
+
+In [3]: X
+Out[3]: 8202600
+
+In [4]: 8202600./(2*38000)
+Out[4]: 107.92894736842105
+
+Chip was running at 8.2026Mhz, so 108-1 = 107 gave a perfect 38KHz
+modulated signal.
+ */

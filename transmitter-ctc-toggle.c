@@ -4,13 +4,11 @@
 
 #include <stdint.h>
 
-//avrdude -c arduino -p atmega328 -P COMPORT -b 19200 -U flash:w:filetoburn.hex
-
 volatile int volume_up = 0, volume_down = 0;
 
 void send_message(uint8_t message) {
   const int length_one = 5, length_zero = 2,
-    length_timeout = 10, length_space = 2;
+    length_timeout = 100, length_space = 2;
   for(int ii = 0; ii < 8; ++ii) {
     // Turn LED on
     TCCR0A |=  (1 << COM0A0);
@@ -29,6 +27,18 @@ void send_message(uint8_t message) {
 
 enum { MSG_VOLUME_UP = 25, MSG_VOLUME_DOWN = 98,
        MSG_TOGGLE_MUTE = 121 };
+
+void read_pins_increment_outbox() {
+  uint8_t pins = PINB;
+
+  if(pins & (1 << PB1)) {
+    volume_up = 3;
+  }
+  else if(pins & (1 << PB2)) {
+    volume_down = 3;
+  }
+}
+
 
 void main() {
   DDRB = (1 << PB0); // set LED pin as an output pin
@@ -61,9 +71,10 @@ void main() {
   PCMSK = (1 << PCINT1) | (1 << PCINT2); 
   sei();              // enable interrupts
 
-
   
   for(;;) {
+    read_pins_increment_outbox();
+    
     if(volume_up > 0) {
       send_message(MSG_VOLUME_UP);
       volume_up--;
@@ -71,34 +82,13 @@ void main() {
     else if (volume_down > 0) {
       send_message(MSG_VOLUME_DOWN);
       volume_down--;
-  }
+    }
 
+    _delay_ms(1);
   }
 }
+
 
 ISR(PCINT0_vect) {
-  uint8_t pins = PINB;
-
-  if(pins & (1 << PB1)) {
-    volume_up = 3;
-  }
-  else if(pins & (1 << PB2)) {
-    volume_down = 3;
-  }
+  read_pins_increment_outbox();
 }
-
-/*
-In [1]: 8000000.0/(2*38000)
-Out[1]: 105.26315789473684
-
-In [2]: X = 2*39060 * 105
-
-In [3]: X
-Out[3]: 8202600
-
-In [4]: 8202600./(2*38000)
-Out[4]: 107.92894736842105
-
-Chip was running at 8.2026Mhz, so 108-1 = 107 gave a perfect 38KHz
-modulated signal.
- */
