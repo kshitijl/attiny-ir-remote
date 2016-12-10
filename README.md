@@ -1,3 +1,11 @@
+## First attempt: phototransistor
+
+This didn't work.
+
+## Second attempt: TSOP sensor and a constant-on signal
+
+The sensor filtered me out.
+
 ## Calculating the resistance in series with IR LED
 
 TSAL7400 http://www.mouser.com/catalog/specsheets/tsal7400.pdf
@@ -133,3 +141,23 @@ doing millions of operations per second (megaflops) of computation
 sounds impressive but is actually laughably pitiful. It is several
 orders of magnitude away from good. So 3200 button presses sounds
 pretty good to me but maybe it's awful.
+
+## Soldering and bringup
+
+## Why did using a raw photodiode fail?
+
+There are several things the TSOP+TSAL combo is doing better than my
+first attempt. First and most fundamentally, I now believe that the
+raw signal from a photodiode probably goes through a lot of gain. I
+probably _was_ getting a signal, just very weak.
+
+But gain leads to noise. They use two ways to reduce the noise. First,
+there's a physical covering on the sensor that filters away things
+that aren't in a certain band of wavelengths (within the infrared
+region). Second, they filter away everything that isn't 38KHz.
+
+Finally, the LED itself is a beast. It can deal with 100mA
+continuously, and 200mA when flashing 38KHz with a duty cycle of 50%.
+
+It will be very interesting to apply these lessons by trying to build
+a sensor in the same style that can achieve signalling across a room. 
