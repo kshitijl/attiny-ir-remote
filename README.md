@@ -103,10 +103,26 @@ Chip was running at 8.2026Mhz, so 108-1 = 107 gave a perfect 38KHz
 modulated signal.
  */
 
-On power down mode at 5V, measured 0.5uA. That would be 80K hours
+On power down mode at 5V, I measured a current of 0.5uA (for the whole
+circuit). That gives me 80,000 hours with the tiny CR220 battery,
 assuming current consumption is the same at a lower voltage
-(unlikely). While a button is pressed, my multimeter reports 15mA.
-That the value is lower than 100mA makes sense: just like a 200mA
-current at a 50% duty cycle is reported as 100mA by this meter, the
-same peak current over the much smaller duty cycle in sending bits
-(and the timeouts between bytes) averages out to a lot less.
+(unlikely).
+
+While a button is pressed, my multimeter reports 15mA. That the value
+is lower than 100mA makes sense: just like a 200mA current at a 50%
+duty cycle is reported as 100mA by this meter, the same peak current
+over the much smaller duty cycle in sending bits (and the timeouts
+between bytes) averages out to a lot less. We calculated 1440s of
+continuous discharge. Estimating a duty cycle of 15%, we get 9600s of
+discharge. Since power consumption in power down mode is a tiny
+fraction of this number we can assume that the entire battery will be
+consumed due to discharge. Assuming a button is held down for about 3
+seconds each time volume is adjusted, we get something like 3200
+volume adjustments from this tiny battery.
+
+Is that great or is that terrible? I am such a beginner that I don't
+know what is considered awful performance. On a desktop, for example,
+doing millions of operations per second (megaflops) of computation
+sounds impressive but is actually laughably pitiful. It is several
+orders of magnitude away from good. So 3200 button presses sounds
+pretty good to me but maybe it's awful.
