@@ -1,6 +1,11 @@
+## Calculating the resistance in series with IR LED
+
 TSAL7400 http://www.mouser.com/catalog/specsheets/tsal7400.pdf
 max current: 100mA
 forward voltage @ 100mA: 1.35V
+
+During development, I'm using a 5V adapter that I found in my bag of
+old junk. I cut off the connector and soldered two jumpers.
 
 V_cc: 5v
 So R = (5 - 1.35)/100mA = 36.5ohm
@@ -18,6 +23,8 @@ R = (3-1.35)/100mA = 16.5ohm
 With 2 LED's,
 R = (3-2*1.35)/100mA = 3ohm
 4.7 ohm is the closest I have.
+
+## Receiving
 
 The lengths of pulses recorded are the same, no matter how much I
 change my timescale! I felt trapped in a bizarro fractal universe,
