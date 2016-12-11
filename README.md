@@ -144,6 +144,69 @@ pretty good to me but maybe it's awful.
 
 ## Soldering and bringup
 
+## Clash of the timers
+
+When I hooked up the now-working receiver code to the actual servo on
+the speaker, the servo behaved very erratically. Had I damaged the
+motor with all that working of instamorph moulding? After a lot of
+debugging, I tracked the issue down to a clash of the timer used by
+the Servo library, with the timer I was using for receiving.
+
+This surprised me and I need to follow up on it. I was using timer 2,
+while the Servo library uses timer 1. This is quite clear from
+documentation, from the existence of a timer2 Servo library separate
+from the default, from the way the compiler complains if you try to
+define a timer1 interrupt handler, and forums. But I had a legitimate
+test case where changing Timer2 registers messed up whether I could
+make the servo turn.
+
+The best way to figure it out is a combination of writing my own servo
+library, reading the atmega328 datasheet, and reading the Servo
+library source. But an even bigger consideration for me here is that
+my final receiver will be an ATtiny85, not an ATmega, so if I am going
+to do a deep dive on timers and PWM for any microcontroller it ought
+to be the ATtiny.
+
+## Why do I love the ATTiny so much?
+
+I am a beginner so my opinion is worthless. But I just find the ATtiny
+so charming! 
+
+## Auto syncing clocks between sender and receiver
+
+Movign to a different timer meant I had to measure a bunch of
+constants and change them in my program. That's because the lengths of
+pulses sent by the ATtiny are shorter or longer depending on your
+timer frequency, and there will be errors if you just assume perfectly
+precise clock speeds.
+
+This got me thinking that real implementations must sync clock
+intervals as unknown hardware gets added to the network.
+
+In preparation for something like that, I refactored my hardcoded
+checks into this:
+
+```
+bool is_close_to(int value, int target) {
+  return abs(value-target) < target/5;
+}
+
+const int transmitter_millisecond = 125;
+const int length_of_one = 5 * transmitter_millisecond;
+const int length_of_zero 250;
+```
+
+Now, when the time comes to do auto syncing of clocks, that constant
+`transmitter_millisecond` will become a variable, and `length_of_one`
+and `length_of_zero` will be functions that depend on the current
+value of `transmitter_millisecond`.
+
+How will the auto-syncing work? When message receipts are going
+successfully (vague), we will adjust the value of
+`transmitter_millisecond` so that the lengths of `one` and `zero`
+pulses that we are actually seeing match what `length_of_one` and
+`length_of_zero` return.
+
 ## Why did using a raw photodiode fail?
 
 There are several things the TSOP+TSAL combo is doing better than my
