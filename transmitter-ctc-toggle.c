@@ -111,8 +111,9 @@ void main() {
   setup_38khz_carrier();
   
   for(;;) {
-    if(read_pins_queue_messages() == BUTTON_WASNT_PRESSED)
-      go_to_sleep();    
+    if(read_pins_queue_messages() == BUTTON_WASNT_PRESSED &&
+       volume_up == 0 && volume_down == 0)
+      go_to_sleep();
     
     if(volume_up > 0) {
       send_message(MSG_VOLUME_UP);
