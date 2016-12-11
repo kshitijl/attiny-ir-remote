@@ -6,32 +6,34 @@
 
 Servo knob_servo;
 
-const int timeout = 500;
+const int timeout = 1500;
 
 void setup() {
   #ifdef DEBUG_SERIAL
   Serial.begin(9600);
   #endif
   
-  knob_servo.attach(7);
   
   pinMode(2, INPUT);
+  // Set the Timer Mode to CTC
+    TCCR0A = (1 << WGM01);
 
-    OCR2A = 100;
+    // Set the value that you want to count to
+    OCR0A = 1;
 
-    TCCR2A = (1 << WGM21);
-    // Set to CTC Mode
+    TIMSK0 = (1 << OCIE0A);    //Set the ISR COMPA vect
 
-    TIMSK2 = (1 << OCIE2A);
-    //Set interrupt on compare match
+    sei();         //enable interrupts
 
-    TCCR2B = (1 << CS22);
-    // https://sites.google.com/site/qeewiki/books/avr-guide/timers-on-the-atmega328
-    // set prescaler to 64 and starts PWM
 
-    TCNT2 = 0;
+    TCCR0B = (1 << CS01) | (1 << CS00);
+    // set prescaler to 256 and start the timer
 
     sei();
+    // enable interrupts
+
+     knob_servo.attach(7);
+
 }
 
 enum { STATE_IDLE, STATE_MARK, STATE_SPACE, STATE_MESSAGE_READY };
@@ -51,30 +53,21 @@ volatile int counter = 0;
 volatile int message[MAX_MESSAGE_LENGTH];
 volatile int message_index = 0;
 
-int volume = 1;
+int volume = 5;
 bool muted = false;
 
 void volume_up() {
   #ifdef DEBUG_SERIAL
   Serial.println("Volume up");
   #endif
-  
-  if(volume < 178)
-      volume+=1;
-  else
-      volume = 178;
+ volume = 100;
 }
 
 void volume_down() {
   #ifdef DEBUG_SERIAL
   Serial.println("Volume down");
   #endif
-  
-  if(volume >= 2)
-      volume -= 1;
-  else
-      volume = 1;
-  // Servo jitters at 0
+  volume = 10;
 }
 
 void toggle_mute() {
@@ -95,18 +88,32 @@ void interpret_message() {
   int message_length = message_index;
     int decoded = 0;
 
+    #ifdef DEBUG_SERIAL 
+      Serial.print("Message length:");
+      Serial.println(message_length);
+      #endif
+
     for(int ii = 0; ii < message_length; ii += 2) {
       int ll = message[ii];
       int bit = 0;
-     // Serial.println(ll);
+      #ifdef DEBUG_SERIAL 
+      Serial.print(ll);
+      Serial.print(" ");
+      #endif
       
-      if(ll > 750 and ll < 850) 
+      if(abs(ll-620) < 620/5) 
           bit = 1;
-       if(ll > 350 and ll < 450)
-          bit = 1;
+       if(abs(ll-250) < 250/5)
+          bit = 0;
 
        decoded += (bit << ii/2);
     }
+
+      #ifdef DEBUG_SERIAL 
+      Serial.println("\n");
+      Serial.print(decoded);
+      Serial.flush();
+      #endif    
 
     if(decoded == MSG_VOLUME_UP) {
       volume_up();
@@ -120,21 +127,20 @@ void interpret_message() {
 }
 
 void loop() {
-    write_knob();
-
     if(current_state == STATE_MESSAGE_READY) {
-      cli();
-      interpret_message();
-      current_state = STATE_IDLE;
-      sei();
-    }
-    
+    cli();
+    interpret_message();
     write_knob();
-    delay(1);
+    current_state = STATE_IDLE;
+    sei();
+  }
+    
+  write_knob();
+
 }
 
 
-ISR (TIMER2_COMPA_vect)  // timer0 overflow interrupt
+ISR (TIMER0_COMPA_vect)  // timer0 overflow interrupt
 {
   int value = read_sensor();
 
