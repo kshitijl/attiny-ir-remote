@@ -60,14 +60,15 @@ void volume_up() {
   #ifdef DEBUG_SERIAL
   Serial.println("Volume up");
   #endif
- volume = 100;
+  volume = min(150, volume+1);
+ //volume = 100;
 }
 
 void volume_down() {
   #ifdef DEBUG_SERIAL
   Serial.println("Volume down");
   #endif
-  volume = 10;
+  volume = max(5, volume-1);
 }
 
 void toggle_mute() {
@@ -83,6 +84,14 @@ void write_knob() {
 
 enum { MSG_VOLUME_UP = 25, MSG_VOLUME_DOWN = 98,
        MSG_TOGGLE_MUTE = 121 };
+
+bool is_close_to(int value, int target) {
+  return abs(value-target) < target/5;
+}
+
+const int transmitter_millisecond = 125;
+const int length_of_one = 5 * transmitter_millisecond;
+const int length_of_zero 250;
 
 void interpret_message() {
   int message_length = message_index;
@@ -101,9 +110,9 @@ void interpret_message() {
       Serial.print(" ");
       #endif
       
-      if(abs(ll-620) < 620/5) 
+      if(IS_CLOSE_TO(ll, LENGTH_OF_ONE)) 
           bit = 1;
-       if(abs(ll-250) < 250/5)
+       if(IS_CLOSE_TO(ll, LENGTH_OF_ZERO))
           bit = 0;
 
        decoded += (bit << ii/2);

@@ -107,11 +107,11 @@ void interpret_message() {
 
 void loop() {
   if(current_state == STATE_MESSAGE_READY) {
-    cli();
+    cli(); // delet this bug
     interpret_message();
     write_knob();
     current_state = STATE_IDLE;
-    sei();
+    sei(); // delet
   }
     
   write_knob();

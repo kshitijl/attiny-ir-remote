@@ -167,6 +167,39 @@ my final receiver will be an ATtiny85, not an ATmega, so if I am going
 to do a deep dive on timers and PWM for any microcontroller it ought
 to be the ATtiny.
 
+### Answer: It's because I disable and enable interrupts
+
+		ref: Using NeoPixels and Servos Together by Phillip Burgess
+
+		I use an interrupt handler running on a timer to measure intervals
+		between state-changes in the input from the TSOP sensor. When a
+		message in ready to be processed, I turn interrupts off so that if
+		a new message comes in, it doesn't overwrite the current one
+		before we're done processing it.
+
+		However, the Arduino Servo library uses timer interrupts, not a
+		PWM mode, so when interrupts are turned off, this throws off the
+		waveform being sent to ther sevo, resulting in the jittering I'm
+		seeing.
+
+		Solution: there are two solutions here.
+		First, I could use a PWM mode to control the servo.
+					 
+	  Second, don't disable interrupts; instead, use a different way to
+	  lock access to the current message.
+	  I can think of a couple ways to do that.
+
+		1. A variable that says whether the current message is writable.
+		This is what I already have: if we are in STATE_MESSAGE_READY, the
+		timer interrupt exits immediately. But there might be a data race
+		here.
+
+		2. I could specifically turn off timer 2 before processing the
+		message.
+
+		3. I could use a small circular queue buffer for messages.
+	
+
 ## Why do I love the ATTiny so much?
 
 I am a beginner so my opinion is worthless. But I just find the ATtiny
@@ -174,7 +207,7 @@ so charming!
 
 ## Auto syncing clocks between sender and receiver
 
-Movign to a different timer meant I had to measure a bunch of
+Moving to a different timer meant I had to measure a bunch of
 constants and change them in my program. That's because the lengths of
 pulses sent by the ATtiny are shorter or longer depending on your
 timer frequency, and there will be errors if you just assume perfectly
