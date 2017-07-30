@@ -169,36 +169,37 @@ to be the ATtiny.
 
 ### Answer: It's because I disable and enable interrupts
 
-		ref: Using NeoPixels and Servos Together by Phillip Burgess
+	ref: Using NeoPixels and Servos Together by Phillip Burgess
 
-		I use an interrupt handler running on a timer to measure intervals
-		between state-changes in the input from the TSOP sensor. When a
-		message in ready to be processed, I turn interrupts off so that if
-		a new message comes in, it doesn't overwrite the current one
-		before we're done processing it.
+I use an interrupt handler running on a timer to measure intervals
+between state-changes in the input from the TSOP sensor. When a
+message in ready to be processed, I turn interrupts off so that if a
+new message comes in, it doesn't overwrite the current one before
+we're done processing it.
 
-		However, the Arduino Servo library uses timer interrupts, not a
-		PWM mode, so when interrupts are turned off, this throws off the
-		waveform being sent to ther sevo, resulting in the jittering I'm
-		seeing.
+However, the Arduino Servo library uses timer interrupts, not a PWM
+mode, so when interrupts are turned off, this throws off the waveform
+being sent to ther sevo, resulting in the jittering I'm seeing.
 
-		Solution: there are two solutions here.
-		First, I could use a PWM mode to control the servo.
+Solution: there are two solutions here. First, I could use a PWM mode
+to control the servo.
 					 
-	  Second, don't disable interrupts; instead, use a different way to
-	  lock access to the current message.
-	  I can think of a couple ways to do that.
+Second, don't disable interrupts; instead, use a different way to lock
+access to the current message. I can think of a couple ways to do
+that.
 
-		1. A variable that says whether the current message is writable.
-		This is what I already have: if we are in STATE_MESSAGE_READY, the
-		timer interrupt exits immediately. But there might be a data race
-		here.
+1. A variable that says whether the current message is writable. This
+is what I already have: if we are in STATE_MESSAGE_READY, the timer
+interrupt exits immediately. But there might be a data race here.
 
-		2. I could specifically turn off timer 2 before processing the
-		message.
+2. I could specifically turn off timer 2 before processing the
+message.
 
-		3. I could use a small circular queue buffer for messages.
-	
+3. I could use a small circular queue buffer for messages.
+
+## PWM frequency is off by 25% from my calculations
+
+Is the internal 1MHz clock really 1MHz?
 
 ## Why do I love the ATTiny so much?
 
@@ -257,3 +258,7 @@ continuously, and 200mA when flashing 38KHz with a duty cycle of 50%.
 
 It will be very interesting to apply these lessons by trying to build
 a sensor in the same style that can achieve signalling across a room. 
+
+## Notes on type checking
+
+Using WGM02 with TCCR0A should be a type error.
