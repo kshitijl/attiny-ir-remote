@@ -199,7 +199,22 @@ message.
 
 ## PWM frequency is off by 25% from my calculations
 
-Is the internal 1MHz clock really 1MHz?
+### Is the internal 1MHz clock really 1MHz?
+
+Yes -- using CTC toggle mode with no prescaling and OCR0A=0, I get a
+505KHz square wave. The pulse widths are pretty much spot on at 1
+microsecond. Close enough.
+
+### Can I get a 50Hz square wave in CTC mode?
+
+Yes if I write it as OCR0A = 39.
+No if I write it as OCR0A = (F_CPU / 256000) * 20 / 2;
+
+Got it! It's a truncation bug. Rearranging like this:
+
+OCR0A = ((F_CPU / 1000) * 20 / 256) / 2;
+
+fixes the problem.
 
 ## Why do I love the ATTiny so much?
 

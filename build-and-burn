@@ -1,0 +1,10 @@
+set -e -x
+
+SERIAL_PORT=`ls /dev/cu*serial*`
+INPUT=$1
+OUTPUT_HEX=$1.hex
+
+avr-gcc $INPUT -DF_CPU=1000000UL -Wall -O2 -mmcu=attiny85 -o $OUTPUT_HEX
+avrdude -p attiny85 -c arduino -P $SERIAL_PORT -b 19200 -U flash:w:$OUTPUT_HEX
+
+set +e +x
