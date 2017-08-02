@@ -1,4 +1,0 @@
-SERIAL_PORT=`ls /dev/cu*serial*`
-
-avr-gcc pwm-attiny85.c -DF_CPU=1000000UL -Wall -O2 -mmcu=attiny85 -o pwm-attiny85.hex
-avrdude -p attiny85 -c arduino -P $SERIAL_PORT -b 19200 -U flash:w:pwm-attiny85.hex

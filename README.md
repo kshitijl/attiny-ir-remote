@@ -6,6 +6,14 @@ This didn't work.
 
 The sensor filtered me out.
 
+## Debug traces
+
+![Cooloff too quick](scope-traces/ir-packets-from-LG-remote/cooloff-too-quick.png "Title")
+
+![Normal operation](scope-traces/ir-packets-from-LG-remote/normal-operation.png "a")
+
+![Cooloff too quick](scope-traces/ir-packets-from-LG-remote/cooloff-too-quick-2.png "b")
+
 ## Calculating the resistance in series with IR LED
 
 TSAL7400 http://www.mouser.com/catalog/specsheets/tsal7400.pdf
@@ -273,6 +281,19 @@ continuously, and 200mA when flashing 38KHz with a duty cycle of 50%.
 
 It will be very interesting to apply these lessons by trying to build
 a sensor in the same style that can achieve signalling across a room. 
+
+## How fast can we respond to input?
+
+### Using a tight loop in the main thread
+
+Around 9 microseconds (9 instructions) to read an input pin and copy
+its state to an output pin.
+
+### Using a timer overflow interrupt with no prescaler
+
+About 50 microseconds in my experiments, although this will vary and
+can be as bad as 255 microseconds, because the counter goes up to 255
+before overflowing and causing the interrupt.
 
 ## Notes on type checking
 
