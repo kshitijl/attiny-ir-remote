@@ -4,8 +4,8 @@
 
 // Toggles output pin every time a pulse > 5ms is detected.
 
-const uint8_t input_pin  = DDB0; // pin 5
-const uint8_t output_pin = DDB1; // pin 6
+const uint8_t input_pin  = PIN0; // pin 5
+const uint8_t output_pin = PIN1; // pin 6
 const uint8_t clock_out_pin = DDB3; // pin 2
 
 const uint8_t cooloff_pin = DDB4; // pin 3

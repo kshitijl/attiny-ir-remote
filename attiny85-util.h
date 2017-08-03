@@ -47,6 +47,31 @@ void put_timer1_in_ctc_mode(const uint8_t compare_value) {
   OCR1C = compare_value;
 }
 
+enum timer0_prescaler_mode {
+  TIMER0_PRESCALER_256 = CS02
+};
+typedef enum timer0_prescaler_mode timer0_prescaler_mode_t;
+
+enum timer0_output_pin {
+  TIMER0_PIN1_ACTUALLY_6 = COM0B1
+};
+typedef enum timer0_output_pin timer0_output_pin_t;
+
+void
+put_timer0_in_fast_pwm_mode_with_top(timer0_prescaler_mode_t which_mode,
+                                     timer0_output_pin_t which_pin,
+                                     uint8_t count_up_to) {
+  TCCR0A = (1 << which_pin) | (1 << WGM00) | (1 << WGM01);
+  TCCR0B = (1 << which_mode)| (1 << WGM02);
+
+  OCR0A = count_up_to;
+}
+
+void timer0_pwm_set_duty_cycle(uint8_t duty) {
+  OCR0B = duty*OCR0A/100;
+}
+                                          
+
 uint8_t TIMER1_OFF = ~((1 << CS10) |
                        (1 << CS11) |
                        (1 << CS12) |

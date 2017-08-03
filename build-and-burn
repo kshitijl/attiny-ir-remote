@@ -3,7 +3,7 @@ set -e -x
 INPUT=$1
 OUTPUT_HEX=$1.hex
 
-avr-gcc $INPUT -DF_CPU=1000000UL -Wall -O2 -mmcu=attiny85 -o $OUTPUT_HEX
+avr-g++ $INPUT -Wall -O2 -mmcu=attiny85 -o $OUTPUT_HEX
 
 SERIAL_PORT=`ls /dev/cu*serial*`
 avrdude -p attiny85 -c arduino -P $SERIAL_PORT -b 19200 -U flash:w:$OUTPUT_HEX
