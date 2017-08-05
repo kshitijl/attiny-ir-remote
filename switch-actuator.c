@@ -37,7 +37,7 @@ volatile receiver_state_t current_receiver_state;
 volatile actuator_state_t current_actuator_state;
 
 /* Actual min and max are 2 and 8 */
-const uint8_t duty_min = 3, duty_max = 7, duty_idle = 5;
+const uint8_t duty_min = 4, duty_max = 6, duty_idle = 5;
 int8_t movement_direction = 1;
 
 void initialize_state() {
